@@ -1,12 +1,12 @@
 // app/input/page.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { db, Thought, Branch } from "@/lib/db";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, PanInfo } from "framer-motion";
 
-export default function InputPage() {
+function InputPageContent() {
   const [messages, setMessages] = useState<Thought[]>([]);
   const [input, setInput] = useState("");
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
@@ -14,7 +14,7 @@ export default function InputPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null); // 自動スクロール用
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionInitialized = useRef(false);
@@ -53,32 +53,28 @@ export default function InputPage() {
         const sessionId = Number(sessionIdParam);
         setCurrentSessionId(sessionId);
 
-        // 既存のブランチを読み込む
         const existingBranches = await db.branches
           .where("sessionId")
           .equals(sessionId)
           .toArray();
         setBranches(existingBranches);
 
-        // メインブランチ（最初のブランチ）を選択
         if (existingBranches.length > 0) {
           setCurrentBranchId(existingBranches[0].id!);
           await loadBranchMessages(existingBranches[0].id!);
         }
       } else {
-        // 新しいセッションを作成
         const sessionId = await db.sessions.add({
           createdAt: new Date(),
           updatedAt: new Date(),
         });
         setCurrentSessionId(sessionId as number);
 
-        // メインブランチを作成
         const branchId = await db.branches.add({
           sessionId: sessionId as number,
           name: "メインの思考",
           parentBranchId: null,
-          rootThoughtId: 0, // 仮の値
+          rootThoughtId: 0,
           createdAt: new Date(),
         });
         setCurrentBranchId(branchId as number);
@@ -126,10 +122,8 @@ export default function InputPage() {
   const handleCreateBranch = async (fromThoughtId: number) => {
     if (!currentSessionId) return;
 
-    // 分岐元のメッセージを取得
     const branchFromMessage = messages.find((m) => m.id === fromThoughtId);
 
-    // 分岐名を分岐元メッセージの内容にする（最大30文字）
     const branchName = branchFromMessage
       ? branchFromMessage.content.substring(0, 30) +
         (branchFromMessage.content.length > 30 ? "..." : "")
@@ -155,22 +149,19 @@ export default function InputPage() {
     setBranches([...branches, newBranch]);
 
     if (branchFromMessage) {
-      // 分岐元のメッセージを新しいブランチにコピー（参照用として）
       const copiedThought: Thought = {
         content: `[分岐元] ${branchFromMessage.content}`,
         timestamp: new Date(),
-        parentId: null, // 新しいブランチのルート
+        parentId: null,
         sessionId: currentSessionId,
         branchId: branchId as number,
       };
 
       const copiedId = await db.thoughts.add(copiedThought);
 
-      // 新しい分岐に切り替え（分岐元メッセージが表示される）
       setCurrentBranchId(branchId as number);
       setMessages([{ ...copiedThought, id: copiedId as number }]);
     } else {
-      // フォールバック：分岐元が見つからない場合は空で開始
       setCurrentBranchId(branchId as number);
       setMessages([]);
     }
@@ -185,7 +176,6 @@ export default function InputPage() {
   };
 
   const handleSwipe = (messageId: number, info: PanInfo) => {
-    // 左スワイプ（offsetX が負の値）で分岐作成
     if (info.offset.x < -100) {
       handleCreateBranch(messageId);
     }
@@ -302,7 +292,6 @@ export default function InputPage() {
               </div>
             </motion.div>
           ))}
-          {/* 自動スクロール用の要素 */}
           <div ref={messagesEndRef} />
         </div>
 
@@ -326,5 +315,19 @@ export default function InputPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InputPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-black text-white flex items-center justify-center">
+          読み込み中...
+        </div>
+      }
+    >
+      <InputPageContent />
+    </Suspense>
   );
 }
