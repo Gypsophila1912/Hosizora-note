@@ -19,3 +19,24 @@ develop開発の大本永続
 release次にリリースする機能を置いとく所
 hotfixメインブランチに対する即時修正
 topic複数人での機能開発用
+
+## 使用コマンド
+
+pnpm create expo-app@latest react-native-expo-tutorial --template blank-typescript
+(pnpm create expo-app@latest . --template blank-typescriptとすると現在のフォルダに展開される)
+
+mkdir -p src/assets \
+ src/screens
+
+package.jsonのmainを変更
+srcの中にapp.tsxを新規作成。既存のApp.tsxは削除
+assetsフォルダをsrc配下に移動
+app.jsonファイルの画像パスを変更
+tsconfig.jsonファイル修正
+
+pnpm add -D @biomejs/biome
+（node関係でエラー吐いたとき用
+rm -rf node_modules pnpm-lock.yaml
+pnpm install）
+
+pnpm biome init
