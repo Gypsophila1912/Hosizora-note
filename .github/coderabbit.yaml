@@ -1,0 +1,37 @@
+language: "ja" # 日本語でレビューさせる
+
+reviews:
+  profile: "assertive" # 厳しめなら "assertive"、優しめなら "chill"
+
+  request_changes_workflow: true # 問題あればChanges Requestする
+
+  high_level_summary: true # PR全体の要約
+  poem: false # ポエム生成（不要ならfalse）
+
+  review_status: true # ステータスコメント出す
+
+  collapse_walkthrough: false # 詳細レビューを折りたたまない
+
+  auto_review:
+    enabled: true
+    drafts: false # draft PRでもレビューするならtrue
+
+  base_branches:
+    - main
+    - develop
+
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+
+chat:
+  auto_reply: true # PR内で話しかけたら返してくれる
+
+tone_instructions: |
+  日本語でレビューしてください。
+  初心者にもわかりやすく、具体的に改善点を説明してください。
+  必要に応じてコード例も提示してください。
+  指摘はフレンドリーかつ建設的に行ってください。
+
+knowledge_base:
+  opt_out: false
