@@ -40,3 +40,16 @@ rm -rf node_modules pnpm-lock.yaml
 pnpm install）
 
 pnpm biome init
+
+## フォルダ構成について
+
+srcにアプリ関連入ってる
+app:アプリのエントリーポイント
+db:DB関連
+features:アプリの画面
+domain:ビジネスロジック（純粋関数）
+hooks:UIとロジックの橋渡し
+repository:DBアクセス（Drizzle）
+ui:Reactコンポーネント
+navigation:
+shared:
