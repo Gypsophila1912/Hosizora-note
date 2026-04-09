@@ -50,6 +50,15 @@ features:アプリの画面
 domain:ビジネスロジック（純粋関数）
 hooks:UIとロジックの橋渡し
 repository:DBアクセス（Drizzle）
+store:状態管理zustand用
 ui:Reactコンポーネント
 navigation:
 shared:
+
+## 状態管理やイベント管理など
+
+zustandを使用して共通で状態を管理できるようにする。登録するやり方は要勉強。
+eventBusは関数を辞書登録しておいてまとめて発火できるようにしておく。
+
+今回の流れとしては
+useChatStoreでメッセージの型と関数本体を定義
